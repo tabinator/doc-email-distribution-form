@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="DOC activation and deactivation notification request form."
+    >
+    <title>DOC Status Notification</title>
+    <script>
+      try {
+        const savedTheme = localStorage.getItem("doc-status-theme");
+        const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+        document.documentElement.dataset.theme = savedTheme || preferredTheme;
+      } catch {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Mulish:wght@300..900&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Department Operations Center</p>
+          <h1>DOC Status Notification</h1>
+          <p class="header-copy">
+            Activation &amp; deactivation email distribution request.
+          </p>
+        </div>
+        <button class="theme-toggle" type="button" id="theme-toggle" aria-pressed="false">
+          Dark mode
+        </button>
+      </header>
+
+      <section class="workspace" aria-label="DOC notification workspace">
+        <form class="status-form" id="status-form">
+          <section class="form-section" aria-labelledby="status-heading">
+            <div class="section-heading">
+              <h2 id="status-heading">Status</h2>
+              <span class="heading-marks">
+                <span class="required-mark">Required</span>
+                <span class="section-mark">01</span>
+              </span>
+            </div>
+
+            <div class="field-grid two-column">
+              <label>
+                Action
+                <select name="action" required>
+                  <option value="">Select action</option>
+                  <option value="activation">Activation</option>
+                  <option value="deactivation">Deactivation</option>
+                </select>
+              </label>
+
+              <label>
+                Status Level
+                <select name="statusLevel" required>
+                  <option value="">Select level</option>
+                  <option value="Level 3">Level 3</option>
+                  <option value="Level 2">Level 2</option>
+                  <option value="Level 1">Level 1</option>
+                </select>
+              </label>
+
+              <label>
+                Staffing Level
+                <select name="staffingLevel" required>
+                  <option value="">Select staffing</option>
+                  <option value="Minimal">Minimal</option>
+                  <option value="Normal">Normal</option>
+                  <option value="Optimal">Optimal</option>
+                  <option value="Peak">Peak</option>
+                </select>
+              </label>
+
+              <label>
+                Storm Event
+                <select name="stormEvent" required>
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </label>
+
+              <label>
+                Effective Date and Time
+                <input name="effectiveDateTime" type="datetime-local" required>
+              </label>
+
+              <label>
+                Event/Incident Name
+                <input
+                  name="incidentName"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Airport Fire, Winter Storm, etc."
+                  required
+                >
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="message-heading">
+            <div class="section-heading">
+              <h2 id="message-heading">Message</h2>
+              <span class="section-mark">02</span>
+            </div>
+
+            <div class="field-grid">
+              <div class="field-grid two-column">
+                <label>
+                  DOC Position
+                  <input
+                    name="docPosition"
+                    type="text"
+                    autocomplete="organization-title"
+                    placeholder="DOC Manager, Incident Commander, etc."
+                    required
+                  >
+                </label>
+
+                <label>
+                  Name
+                  <input name="name" type="text" autocomplete="name" required>
+                </label>
+              </div>
+
+              <label>
+                Subject
+                <select name="subject" required>
+                  <option value="">Select subject</option>
+                  <option value="DOC Activation Notice">DOC Activation Notice</option>
+                  <option value="DOC Deactivation Notice">DOC Deactivation Notice</option>
+                </select>
+              </label>
+
+              <label>
+                Message body
+                <textarea
+                  name="messageBody"
+                  rows="7"
+                  placeholder="Enter the operational message to include in the memo."
+                  required
+                ></textarea>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="routing-heading">
+            <div class="section-heading">
+              <h2 id="routing-heading">Routing</h2>
+              <span class="section-mark">03</span>
+            </div>
+
+            <div class="field-grid two-column">
+              <fieldset class="distribution-groups">
+                <legend>Distribution Groups</legend>
+                <label class="group-chip">
+                  <input type="checkbox" name="distributionGroups" value="Orange County Public Works" checked>
+                  <span>Orange County Public Works</span>
+                </label>
+                <label class="group-chip">
+                  <input type="checkbox" name="distributionGroups" value="PIO, Safety, Payroll, & Emergency Management" checked>
+                  <span>PIO, Safety, Payroll, &amp; Emergency Management</span>
+                </label>
+                <label class="group-chip">
+                  <input type="checkbox" name="distributionGroups" value="Operations & Maintenance" checked>
+                  <span>Operations &amp; Maintenance</span>
+                </label>
+                <label class="group-chip">
+                  <input type="checkbox" name="distributionGroups" value="Orange County Sheriff's Department" checked>
+                  <span>Orange County Sheriff's Department</span>
+                </label>
+                <label class="group-chip">
+                  <input type="checkbox" name="distributionGroups" value="City Contracts">
+                  <span>City Contracts</span>
+                </label>
+                <label class="group-chip">
+                  <input type="checkbox" name="distributionGroups" value="United States Army Corps of Engineers">
+                  <span>United States Army Corps of Engineers</span>
+                </label>
+              </fieldset>
+            </div>
+          </section>
+
+          <div class="form-actions">
+            <button type="reset" class="secondary-button">Clear</button>
+            <button type="button" class="primary-button" id="review-button">
+              Review payload
+            </button>
+          </div>
+        </form>
+
+        <aside class="review-panel" aria-labelledby="review-heading">
+          <div class="section-heading">
+            <h2 id="review-heading">Review</h2>
+            <span class="section-mark">JSON</span>
+          </div>
+          <pre id="payload-preview">Payload pending.</pre>
+          <div class="review-actions">
+            <p class="submit-status" id="submit-status" role="status"></p>
+            <button type="button" class="primary-button" id="submit-button" disabled>
+              Submit request
+            </button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
