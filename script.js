@@ -1,10 +1,12 @@
-const REST_ENDPOINT = "";
+const REST_ENDPOINT = "https://api-ocgis-gcfqa3dqaxf4azgu.westus-01.azurewebsites.net/api/oc-departmentoperations/send-ocdo-memo";
 
 const form = document.querySelector("#status-form");
 const themeToggle = document.querySelector("#theme-toggle");
 const reviewButton = document.querySelector("#review-button");
 const submitButton = document.querySelector("#submit-button");
 const payloadPreview = document.querySelector("#payload-preview");
+const validationSummary = document.querySelector("#validation-summary");
+const validationList = document.querySelector("#validation-list");
 const submitStatus = document.querySelector("#submit-status");
 const actionField = form.elements.action;
 const subjectField = form.elements.subject;
@@ -20,6 +22,54 @@ const actionSubjectMap = {
 const subjectActionMap = Object.fromEntries(
   Object.entries(actionSubjectMap).map(([action, subject]) => [subject, action]),
 );
+
+const validationSteps = [
+  {
+    label: "Action",
+    isComplete: () => Boolean(actionField.value),
+    getValue: (payload) => actionSubjectMap[payload.action] || payload.action,
+  },
+  {
+    label: "Status level",
+    isComplete: () => Boolean(form.elements.statusLevel.value),
+    getValue: (payload) => payload.statusLevel,
+  },
+  {
+    label: "Staffing level",
+    isComplete: () => Boolean(form.elements.staffingLevel.value),
+    getValue: (payload) => payload.staffingLevel,
+  },
+  {
+    label: "Effective time",
+    isComplete: () => Boolean(form.elements.effectiveDateTime.value),
+    getValue: (payload) => formatMessageDateTime(payload.effectiveDateTime),
+  },
+  {
+    label: "Incident name",
+    isComplete: () => Boolean(form.elements.incidentName.value.trim()),
+    getValue: (payload) => payload.incidentName,
+  },
+  {
+    label: "DOC position",
+    isComplete: () => Boolean(form.elements.docPosition.value.trim()),
+    getValue: (payload) => payload.docPosition,
+  },
+  {
+    label: "Name",
+    isComplete: () => Boolean(form.elements.name.value.trim()),
+    getValue: (payload) => payload.name,
+  },
+  {
+    label: "Message body",
+    isComplete: () => Boolean(form.elements.messageBody.value.trim()),
+    getValue: (payload) => `${payload.messageBody.length} characters ready`,
+  },
+  {
+    label: "Distribution",
+    isComplete: () => distributionGroupInputs.some((input) => input.checked),
+    getValue: (payload) => `${payload.distributionGroups.length} group${payload.distributionGroups.length === 1 ? "" : "s"} selected`,
+  },
+];
 
 function setTheme(theme) {
   document.documentElement.dataset.theme = theme;
@@ -60,6 +110,60 @@ function renderPayload(payload) {
   payloadPreview.textContent = JSON.stringify(payload, null, 2);
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function renderValidationState(message, items = []) {
+  validationSummary.textContent = message;
+  validationList.innerHTML = items
+    .map(
+      (item, index) => `
+        <li class="validation-item ${item.state}" style="--step-index: ${index}">
+          <span class="validation-icon" aria-hidden="true">${item.icon}</span>
+          <span>
+            <span class="validation-label">${escapeHtml(item.label)}</span>
+            <span class="validation-detail">${escapeHtml(item.detail)}</span>
+          </span>
+        </li>
+      `,
+    )
+    .join("");
+}
+
+function renderValidationPending(message = "Complete the form, then review the request.") {
+  renderValidationState(message);
+}
+
+function renderValidationComplete(payload) {
+  renderValidationState(
+    "Request checks passed. Review the details, then submit.",
+    validationSteps.map((step) => ({
+      label: step.label,
+      detail: step.getValue(payload),
+      state: "complete",
+      icon: "&#10003;",
+    })),
+  );
+}
+
+function renderValidationError() {
+  renderValidationState(
+    "Some required details need attention before this can be submitted.",
+    validationSteps.map((step) => ({
+      label: step.label,
+      detail: step.isComplete() ? "Looks ready" : "Required before submit",
+      state: step.isComplete() ? "complete" : "error",
+      icon: step.isComplete() ? "&#10003;" : "!",
+    })),
+  );
+}
+
 function reviewPayload() {
   submitStatus.textContent = "";
   const hasDistributionGroup = distributionGroupInputs.some((input) => input.checked);
@@ -70,11 +174,13 @@ function reviewPayload() {
   if (!form.reportValidity()) {
     currentPayload = null;
     submitButton.disabled = true;
+    renderValidationError();
     return;
   }
 
   currentPayload = getFormPayload();
   renderPayload(currentPayload);
+  renderValidationComplete(currentPayload);
   submitButton.disabled = false;
 }
 
@@ -123,6 +229,7 @@ function clearReviewedPayload() {
   currentPayload = null;
   submitButton.disabled = true;
   submitStatus.textContent = "";
+  renderValidationPending("Request changed. Review again before submitting.");
 }
 
 function syncSubjectToAction() {
@@ -228,3 +335,4 @@ form.addEventListener("reset", () => {
 
 form.elements.effectiveDateTime.value = getLocalDateTimeValue();
 setTheme(document.documentElement.dataset.theme || "light");
+renderValidationPending();

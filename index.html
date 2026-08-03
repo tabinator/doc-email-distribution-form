@@ -67,6 +67,7 @@
                 Status Level
                 <select name="statusLevel" required>
                   <option value="">Select level</option>
+                  <option value="Monitoring">Monitoring</option>
                   <option value="Level 3">Level 3</option>
                   <option value="Level 2">Level 2</option>
                   <option value="Level 1">Level 1</option>
@@ -77,10 +78,12 @@
                 Staffing Level
                 <select name="staffingLevel" required>
                   <option value="">Select staffing</option>
+                  <option value="Monitoring">Monitoring</option>
                   <option value="Minimal">Minimal</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Optimal">Optimal</option>
-                  <option value="Peak">Peak</option>
+                  <option value="Partial">Partial</option>
+                  <option value="Full">Full</option>
+                  <option value="Duty Officer">Duty Officer</option>
+                  <option value="Virtual">Virtual</option>
                 </select>
               </label>
 
@@ -113,7 +116,10 @@
           <section class="form-section" aria-labelledby="message-heading">
             <div class="section-heading">
               <h2 id="message-heading">Message</h2>
-              <span class="section-mark">02</span>
+              <span class="heading-marks">
+                <span class="required-mark">Required</span>
+                <span class="section-mark">02</span>
+              </span>
             </div>
 
             <div class="field-grid">
@@ -159,7 +165,10 @@
           <section class="form-section" aria-labelledby="routing-heading">
             <div class="section-heading">
               <h2 id="routing-heading">Routing</h2>
-              <span class="section-mark">03</span>
+              <span class="heading-marks">
+                <span class="required-mark">Required</span>
+                <span class="section-mark">03</span>
+              </span>
             </div>
 
             <div class="field-grid two-column">
@@ -204,9 +213,16 @@
         <aside class="review-panel" aria-labelledby="review-heading">
           <div class="section-heading">
             <h2 id="review-heading">Review</h2>
-            <span class="section-mark">JSON</span>
+            <span class="section-mark">READY</span>
           </div>
-          <pre id="payload-preview">Payload pending.</pre>
+          <div class="validation-summary" id="validation-summary">
+            Complete the form, then review the request.
+          </div>
+          <ol class="validation-list" id="validation-list" aria-live="polite"></ol>
+          <details class="payload-details">
+            <summary>View JSON payload</summary>
+            <pre id="payload-preview">Payload pending.</pre>
+          </details>
           <div class="review-actions">
             <p class="submit-status" id="submit-status" role="status"></p>
             <button type="button" class="primary-button" id="submit-button" disabled>
