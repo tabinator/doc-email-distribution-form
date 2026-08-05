@@ -23,6 +23,43 @@ const subjectActionMap = Object.fromEntries(
   Object.entries(actionSubjectMap).map(([action, subject]) => [subject, action]),
 );
 
+function getDownloadFilename(payload, response) {
+  const contentDisposition = response.headers.get("Content-Disposition") || "";
+  const encodedFilename = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+  const plainFilename = contentDisposition.match(/filename="?([^";]+)"?/i);
+
+  if (encodedFilename) {
+    return decodeURIComponent(encodedFilename[1]);
+  }
+
+  if (plainFilename) {
+    return plainFilename[1];
+  }
+
+  const action = payload.action || "doc-status";
+  const incident = payload.incidentName || "memo";
+  const date = new Date().toISOString().slice(0, 10);
+  const safeName = `${action}-${incident}-${date}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  return `${safeName || "doc-status-memo"}.pdf`;
+}
+
+function downloadBlob(blob, filename) {
+  const downloadUrl = URL.createObjectURL(blob);
+  const downloadLink = document.createElement("a");
+  downloadLink.href = downloadUrl;
+  downloadLink.download = filename;
+  downloadLink.style.display = "none";
+
+  document.body.append(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+}
+
 const validationSteps = [
   {
     label: "Action",
@@ -209,6 +246,7 @@ async function submitPayload() {
     const response = await fetch(REST_ENDPOINT, {
       method: "POST",
       headers: {
+        "Accept": "application/pdf",
         "Content-Type": "application/json",
       },
       body: JSON.stringify(currentPayload),
@@ -218,7 +256,15 @@ async function submitPayload() {
       throw new Error(`Request failed with ${response.status}`);
     }
 
-    submitStatus.textContent = "Request submitted.";
+    const pdfBlob = await response.blob();
+    if (!pdfBlob.size) {
+      throw new Error("The service returned an empty PDF.");
+    }
+
+    const filename = getDownloadFilename(currentPayload, response);
+    downloadBlob(pdfBlob, filename);
+    submitStatus.textContent = `Request submitted. Downloading ${filename}.`;
+    submitButton.disabled = false;
   } catch (error) {
     submitStatus.textContent = error.message;
     submitButton.disabled = false;
