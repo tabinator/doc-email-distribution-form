@@ -77,6 +77,11 @@ const validationSteps = [
     getValue: (payload) => payload.staffingLevel,
   },
   {
+    label: "DOC hotline activated",
+    isComplete: () => Boolean(form.elements.docHotlineActivated.value),
+    getValue: (payload) => payload.docHotlineActivated,
+  },
+  {
     label: "Effective time",
     isComplete: () => Boolean(form.elements.effectiveDateTime.value),
     getValue: (payload) => formatMessageDateTime(payload.effectiveDateTime),
@@ -132,6 +137,7 @@ function getFormPayload() {
     statusLevel: data.get("statusLevel"),
     staffingLevel: data.get("staffingLevel"),
     stormEvent: data.get("stormEvent"),
+    docHotlineActivated: data.get("docHotlineActivated"),
     effectiveDateTime: data.get("effectiveDateTime"),
     incidentName: data.get("incidentName").trim(),
     docPosition: data.get("docPosition").trim(),
@@ -316,7 +322,13 @@ function getActivationMessageBody() {
   const incidentName = getFieldValue("incidentName", "{Event/Incident Name}");
   const statusLevel = getFieldValue("statusLevel", "{Status Level}");
   const staffingLevel = getFieldValue("staffingLevel", "{Staffing Level}");
-  const baseMessage = `The Department Operations Center (DOC) is activated beginning ${effectiveDateTime}. OCPW DOC is activated to support the ${incidentName}. OCPW is currently activated at a ${statusLevel} with ${staffingLevel} staffing.`;
+  const staffingLevelText =
+    staffingLevel === "{Staffing Level}" ? staffingLevel : staffingLevel.toLowerCase();
+  const docHotlineMessage =
+    form.elements.docHotlineActivated.value === "Yes"
+      ? "The DOC Hotline is activated. Report all incident-related problems to (714) 955-0333. This number is operational only when the DOC is open and the DOC Hotline is activated."
+      : "The DOC Hotline is not activated. Report any incident-related problems to the O&M Front Desk at (714) 955-0200.";
+  const baseMessage = `The Department Operations Center (DOC) will be activated beginning ${effectiveDateTime} in support of ${incidentName}. OCPW is currently operating at ${statusLevel} with ${staffingLevelText} staffing.`;
 
   if (form.elements.stormEvent.value !== "Yes") {
     return baseMessage;
@@ -324,14 +336,14 @@ function getActivationMessageBody() {
 
   return `${baseMessage}
 
-Increased emphasis is being placed on monitoring storm flows and inlet grates historically subject to plugging or overtopping. Resources are also focused on protecting the burn areas at the Canyons, Bond Fire Burn Area, Airport Burn Area, and Unincorporated areas of Orange County. Regularly scheduled work may be delated due to the reallocation of resources.
+Increased emphasis is being placed on monitoring storm flows and inlet grates historically subject to plugging or overtopping. Resources are also focused on protecting burn areas, including the Canyons, Bond Fire Burn Area, Airport Burn Area, and unincorporated areas of Orange County. Regularly scheduled work may be delayed due to the reallocation of resources.
 
-Report storm related problems to (714) 955-0333. This number is operational only when the DOC is open.`;
+${docHotlineMessage}`;
 }
 
 function getDeactivationMessageBody() {
   const effectiveDateTime = formatMessageDateTime(form.elements.effectiveDateTime.value);
-  return `The Department Operations Center (DOC) is now deactivated on ${effectiveDateTime}.`;
+  return `The Department Operations Center (DOC) was deactivated on ${effectiveDateTime}.`;
 }
 
 function updateMessageBody() {
@@ -355,7 +367,14 @@ subjectField.addEventListener("change", syncActionToSubject);
 reviewButton.addEventListener("click", reviewPayload);
 submitButton.addEventListener("click", submitPayload);
 
-["effectiveDateTime", "incidentName", "statusLevel", "staffingLevel", "stormEvent"].forEach((name) => {
+[
+  "effectiveDateTime",
+  "incidentName",
+  "statusLevel",
+  "staffingLevel",
+  "stormEvent",
+  "docHotlineActivated",
+].forEach((name) => {
   form.elements[name].addEventListener("input", () => {
     updateMessageBody();
     clearReviewedPayload();

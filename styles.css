@@ -272,6 +272,10 @@ html[data-theme="dark"] .required-mark {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.full-row {
+  grid-column: 1 / -1;
+}
+
 label {
   display: grid;
   gap: 0.38rem;
