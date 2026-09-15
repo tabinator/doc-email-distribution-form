@@ -331,7 +331,9 @@ function getActivationMessageBody() {
   const baseMessage = `The Department Operations Center (DOC) will be activated beginning ${effectiveDateTime} in support of ${incidentName}. OCPW is currently operating at ${statusLevel} with ${staffingLevelText} staffing.`;
 
   if (form.elements.stormEvent.value !== "Yes") {
-    return baseMessage;
+    return `${baseMessage}
+
+${docHotlineMessage}`;
   }
 
   return `${baseMessage}
